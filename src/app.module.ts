@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { EnvironmentConfigModule } from './infrastructure/config/environment-config/environment-config.module';
+import { setEnvironment } from './infrastructure/config/environment-config/set-environment';
 
 @Module({
   imports: [
@@ -8,7 +9,7 @@ import { EnvironmentConfigModule } from './infrastructure/config/environment-con
 	ConfigModule.forRoot({
 		isGlobal: true,
 		expandVariables: true,
-		envFilePath: '.env',
+		envFilePath: setEnvironment(),
 	      }),
 ],
   controllers: [],
