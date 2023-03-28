@@ -6,18 +6,20 @@
   "private": true,
   "license": "MIT",
   "scripts": {
+    "prebuild": "rimraf dist",
+    "prestart": "rimraf dist",
     "build": "nest build",
-    "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "start": "nest start",
-    "start:dev": "nest start --watch",
-    "start:debug": "nest start --debug --watch",
-    "start:prod": "node dist/main",
-    "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",
-    "test": "jest",
-    "test:watch": "jest --watch",
+    "start:dev": "cross-env NODE_ENV=development npm start --watch",
+    "start:debug": "cross-env NODE_ENV=development npm start --debug --watch",
+    "start:prod": "cross-env NODE_ENV=production node dist/main",
+    "test": "cross-env NODE_ENV=test jest",
+    "test:watch": "cross-env NODE_ENV=test jest --watch",
     "test:cov": "jest --coverage",
-    "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
-    "test:e2e": "jest --config ./test/jest-e2e.json"
+    "test:debug": "cross-env NODE_ENV=test node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
+    "test:e2e": "cross-env NODE_ENV=test jest --config ./test/jest-e2e.json",
+    "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",
+    "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\""
   },
   "dependencies": {
     "@nestjs/common": "^9.0.0",
@@ -25,8 +27,10 @@
     "@nestjs/core": "^9.0.0",
     "@nestjs/platform-express": "^9.0.0",
     "@nestjs/typeorm": "^9.0.1",
+    "cross-env": "^7.0.3",
     "pg": "^8.10.0",
     "reflect-metadata": "^0.1.13",
+    "rimraf": "^4.4.1",
     "rxjs": "^7.2.0"
   },
   "devDependencies": {
