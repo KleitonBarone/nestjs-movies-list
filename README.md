@@ -1,6 +1,6 @@
 ## Description
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+A Rest Api for creating movie list using Nest Framework
 
 ## Installation
 
