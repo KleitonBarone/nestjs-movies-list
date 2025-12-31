@@ -14,23 +14,15 @@ The project is in its initial stage with the basic NestJS boilerplate.
 
 The following features are planned for implementation:
 
-**Core Movie API**: Full CRUD (Create, Read, Update, Delete) operations for movie records.
-
-**Data Model**: Comprehensive movie schema including Title, Genre, Release Year, Director, and more.
-
-**Authentication**: Secure access using JWT (JSON Web Tokens) for user-specific lists.
-
-**Search & Filtering**: Advanced search capabilities by title and filters for genre, year, etc.
-
-**External Integration**: Automated movie data fetching from services like TMDB or OMDb.
-
-**Database Integration**: Reliable data storage using PostgreSQL with TypeORM or Prisma.
-
-**API Documentation**: Interactive Swagger/OpenAPI documentation for easy integration.
-
-**Containerization**: Docker support for consistent development and production environments.
-
-**Unit & E2E Testing**: Comprehensive test suite to ensure stability and reliability.
+- [ ] **Core Movie API**: Full CRUD (Create, Read, Update, Delete) operations for movie records.
+- [ ] **Data Model**: Comprehensive movie schema including Title, Genre, Release Year, Director, and more.
+- [ ] **Authentication**: Secure access using JWT (JSON Web Tokens) for user-specific lists.
+- [ ] **Search & Filtering**: Advanced search capabilities by title and filters for genre, year, etc.
+- [ ] **External Integration**: Automated movie data fetching from services like TMDB or OMDb.
+- [ ] **Database Integration**: Reliable data storage using PostgreSQL with TypeORM or Prisma.
+- [ ] **API Documentation**: Interactive Swagger/OpenAPI documentation for easy integration.
+- [ ] **Containerization**: Docker support for consistent development and production environments.
+- [ ] **Unit & E2E Testing**: Comprehensive test suite to ensure stability and reliability.
 
 ## Project Setup
 
