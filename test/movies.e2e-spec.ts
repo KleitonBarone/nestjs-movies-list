@@ -4,6 +4,7 @@ import request from 'supertest';
 import { AppModule } from './../src/app.module';
 import { ZodValidationPipe } from 'nestjs-zod';
 import { Movie } from '../src/movies/entities/movie.entity';
+import { User } from '../src/users/entities/user.entity';
 import { Server } from 'http';
 
 import { getRepositoryToken } from '@nestjs/typeorm';
@@ -12,6 +13,12 @@ import { Repository } from 'typeorm';
 describe('MoviesController (e2e)', () => {
   let app: INestApplication;
   let movieRepository: Repository<Movie>;
+  let userRepository: Repository<User>;
+  let authToken: string;
+  const testUser = {
+    email: `user+${Date.now()}@example.com`,
+    password: 'StrongP@ssw0rd!',
+  };
 
   beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
@@ -25,6 +32,22 @@ describe('MoviesController (e2e)', () => {
     movieRepository = moduleFixture.get<Repository<Movie>>(
       getRepositoryToken(Movie),
     );
+
+    userRepository = moduleFixture.get<Repository<User>>(
+      getRepositoryToken(User),
+    );
+
+    // Create a user and login to obtain JWT token
+    await request(app.getHttpServer() as Server)
+      .post('/auth/signup')
+      .send({ email: testUser.email, password: testUser.password })
+      .expect(201);
+
+    const loginRes = await request(app.getHttpServer() as Server)
+      .post('/auth/login')
+      .send({ email: testUser.email, password: testUser.password })
+      .expect(200);
+    authToken = (loginRes.body as { access_token: string }).access_token;
   });
 
   beforeEach(async () => {
@@ -33,6 +56,7 @@ describe('MoviesController (e2e)', () => {
 
   afterAll(async () => {
     await movieRepository.clear();
+    await userRepository.clear();
     await app.close();
   });
 
@@ -48,6 +72,7 @@ describe('MoviesController (e2e)', () => {
     it('should create a movie', () => {
       return request(app.getHttpServer() as Server)
         .post('/movies')
+        .set('Authorization', `Bearer ${authToken}`)
         .send(movie)
         .expect(201)
         .expect((res) => {
@@ -62,6 +87,7 @@ describe('MoviesController (e2e)', () => {
     it('should return 400 for validation error', () => {
       return request(app.getHttpServer() as Server)
         .post('/movies')
+        .set('Authorization', `Bearer ${authToken}`)
         .send({
           title: '', // Empty title
           description: 'Desc',
@@ -76,6 +102,7 @@ describe('MoviesController (e2e)', () => {
     it('should return an array of movies', () => {
       return request(app.getHttpServer() as Server)
         .get('/movies')
+        .set('Authorization', `Bearer ${authToken}`)
         .expect(200)
         .expect((res) => {
           expect(Array.isArray(res.body)).toBe(true);
@@ -85,10 +112,12 @@ describe('MoviesController (e2e)', () => {
     it('should filter movies by title', async () => {
       await request(app.getHttpServer() as Server)
         .post('/movies')
+        .set('Authorization', `Bearer ${authToken}`)
         .send(movie);
 
       return request(app.getHttpServer() as Server)
         .get('/movies')
+        .set('Authorization', `Bearer ${authToken}`)
         .query({ title: 'Inception' })
         .expect(200)
         .expect((res) => {
@@ -101,10 +130,12 @@ describe('MoviesController (e2e)', () => {
     it('should filter movies by genre', async () => {
       await request(app.getHttpServer() as Server)
         .post('/movies')
+        .set('Authorization', `Bearer ${authToken}`)
         .send(movie);
 
       return request(app.getHttpServer() as Server)
         .get('/movies')
+        .set('Authorization', `Bearer ${authToken}`)
         .query({ genre: 'Sci-Fi' })
         .expect(200)
         .expect((res) => {
@@ -117,10 +148,12 @@ describe('MoviesController (e2e)', () => {
     it('should filter movies by releaseYear', async () => {
       await request(app.getHttpServer() as Server)
         .post('/movies')
+        .set('Authorization', `Bearer ${authToken}`)
         .send(movie);
 
       return request(app.getHttpServer() as Server)
         .get('/movies')
+        .set('Authorization', `Bearer ${authToken}`)
         .query({ releaseYear: 2010 })
         .expect(200)
         .expect((res) => {
@@ -133,10 +166,12 @@ describe('MoviesController (e2e)', () => {
     it('should support combined filters (title + genre + releaseYear)', async () => {
       await request(app.getHttpServer() as Server)
         .post('/movies')
+        .set('Authorization', `Bearer ${authToken}`)
         .send(movie);
 
       return request(app.getHttpServer() as Server)
         .get('/movies')
+        .set('Authorization', `Bearer ${authToken}`)
         .query({ title: 'Inception', genre: 'Sci-Fi', releaseYear: 2010 })
         .expect(200)
         .expect((res) => {
@@ -153,6 +188,7 @@ describe('MoviesController (e2e)', () => {
     it('should return empty list when no match', () => {
       return request(app.getHttpServer() as Server)
         .get('/movies')
+        .set('Authorization', `Bearer ${authToken}`)
         .query({ title: 'NonExistentMovie' })
         .expect(200)
         .expect((res) => {
@@ -165,12 +201,14 @@ describe('MoviesController (e2e)', () => {
     it('should return a specific movie', async () => {
       const createResponse = await request(app.getHttpServer() as Server)
         .post('/movies')
+        .set('Authorization', `Bearer ${authToken}`)
         .send(movie);
 
       const movieId = (createResponse.body as Movie).id;
 
       return request(app.getHttpServer() as Server)
         .get(`/movies/${movieId}`)
+        .set('Authorization', `Bearer ${authToken}`)
         .expect(200)
         .expect((res) => {
           const body = res.body as Movie;
@@ -184,6 +222,7 @@ describe('MoviesController (e2e)', () => {
     it('should return 404 for non-existent movie', () => {
       return request(app.getHttpServer() as Server)
         .get('/movies/999')
+        .set('Authorization', `Bearer ${authToken}`)
         .expect(404)
         .expect((res) => {
           const body = res.body as { message?: unknown };
@@ -195,6 +234,7 @@ describe('MoviesController (e2e)', () => {
     it('should return 400 for invalid id param', () => {
       return request(app.getHttpServer() as Server)
         .get('/movies/abc')
+        .set('Authorization', `Bearer ${authToken}`)
         .expect(400);
     });
   });
@@ -203,6 +243,7 @@ describe('MoviesController (e2e)', () => {
     it('should update a movie', async () => {
       const createResponse = await request(app.getHttpServer() as Server)
         .post('/movies')
+        .set('Authorization', `Bearer ${authToken}`)
         .send(movie);
 
       const movieId = (createResponse.body as Movie).id;
@@ -210,6 +251,7 @@ describe('MoviesController (e2e)', () => {
 
       return request(app.getHttpServer() as Server)
         .patch(`/movies/${movieId}`)
+        .set('Authorization', `Bearer ${authToken}`)
         .send(updateData)
         .expect(200)
         .expect((res) => {
@@ -222,6 +264,7 @@ describe('MoviesController (e2e)', () => {
     it('should return 404 for non-existent movie', () => {
       return request(app.getHttpServer() as Server)
         .patch('/movies/999')
+        .set('Authorization', `Bearer ${authToken}`)
         .send({ title: 'New Title' })
         .expect(404);
     });
@@ -229,12 +272,14 @@ describe('MoviesController (e2e)', () => {
     it('should return 400 for invalid update payload', async () => {
       const createResponse = await request(app.getHttpServer() as Server)
         .post('/movies')
+        .set('Authorization', `Bearer ${authToken}`)
         .send(movie);
 
       const movieId = (createResponse.body as Movie).id;
 
       return request(app.getHttpServer() as Server)
         .patch(`/movies/${movieId}`)
+        .set('Authorization', `Bearer ${authToken}`)
         .send({ releaseYear: 100 })
         .expect(400);
     });
@@ -244,23 +289,49 @@ describe('MoviesController (e2e)', () => {
     it('should delete a movie', async () => {
       const createResponse = await request(app.getHttpServer() as Server)
         .post('/movies')
+        .set('Authorization', `Bearer ${authToken}`)
         .send(movie);
 
       const movieId = (createResponse.body as Movie).id;
 
       await request(app.getHttpServer() as Server)
         .delete(`/movies/${movieId}`)
+        .set('Authorization', `Bearer ${authToken}`)
         .expect(204);
 
       return request(app.getHttpServer() as Server)
         .get(`/movies/${movieId}`)
+        .set('Authorization', `Bearer ${authToken}`)
         .expect(404);
     });
 
     it('should return 404 for non-existent movie', () => {
       return request(app.getHttpServer() as Server)
         .delete('/movies/999')
+        .set('Authorization', `Bearer ${authToken}`)
         .expect(404);
+    });
+  });
+
+  describe('Auth guard enforcement', () => {
+    it('should return 401 when missing token (GET /movies)', () => {
+      return request(app.getHttpServer() as Server)
+        .get('/movies')
+        .expect(401);
+    });
+
+    it('should return 401 when missing token (POST /movies)', () => {
+      return request(app.getHttpServer() as Server)
+        .post('/movies')
+        .send(movie)
+        .expect(401);
+    });
+
+    it('should return 401 with invalid token', () => {
+      return request(app.getHttpServer() as Server)
+        .get('/movies')
+        .set('Authorization', 'Bearer invalid.token.value')
+        .expect(401);
     });
   });
 });

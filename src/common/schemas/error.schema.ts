@@ -17,10 +17,10 @@ export const UnauthorizedErrorSchema = z
   })
   .openapi('UnauthorizedError');
 
-export const NotFoundErrorSchema = z
-  .object({
-    statusCode: z.number().openapi({ example: 404 }),
-    message: z.string().openapi({ example: 'Movie with ID 1 not found' }),
-    error: z.string().openapi({ example: 'Not Found' }),
-  })
-  .openapi('NotFoundError');
+export const NotFoundErrorSchema = z.object({
+  statusCode: z.number().openapi({ example: 404 }),
+  message: z.string().openapi({ example: 'Movie with ID 1 not found' }),
+  error: z.string().openapi({ example: 'Not Found' }),
+});
+
+export type NotFoundErrorType = z.infer<typeof NotFoundErrorSchema>;

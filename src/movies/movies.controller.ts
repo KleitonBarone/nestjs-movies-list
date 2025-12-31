@@ -10,7 +10,9 @@ import {
   Query,
   HttpCode,
   HttpStatus,
+  UseGuards,
 } from '@nestjs/common';
+import { AuthGuard } from '@nestjs/passport';
 import { MoviesService } from './movies.service';
 import { CreateMovieDto } from './dto/create-movie.dto';
 import { UpdateMovieDto } from './dto/update-movie.dto';
@@ -24,25 +26,12 @@ import {
   ApiQuery,
   ApiTags,
   ApiNoContentResponse,
+  ApiBearerAuth,
 } from '@nestjs/swagger';
-import { MovieSchema } from './entities/movie.schema';
-import { getOpenApiSchema } from '../common/openapi';
-import {
-  BadRequestErrorSchema,
-  NotFoundErrorSchema,
-} from '../common/schemas/error.schema';
-
-const MovieOpenApiSchema = getOpenApiSchema(MovieSchema, 'Movie');
-const BadRequestOpenApiSchema = getOpenApiSchema(
-  BadRequestErrorSchema,
-  'BadRequestError',
-);
-const NotFoundOpenApiSchema = getOpenApiSchema(
-  NotFoundErrorSchema,
-  'NotFoundError',
-);
 
 @ApiTags('Movies')
+@ApiBearerAuth()
+@UseGuards(AuthGuard('jwt'))
 @Controller('movies')
 export class MoviesController {
   constructor(private readonly moviesService: MoviesService) {}
@@ -51,11 +40,9 @@ export class MoviesController {
   @ApiOperation({ summary: 'Create a movie' })
   @ApiCreatedResponse({
     description: 'Movie created',
-    schema: MovieOpenApiSchema,
   })
   @ApiBadRequestResponse({
     description: 'Invalid payload',
-    schema: BadRequestOpenApiSchema,
   })
   create(@Body() createMovieDto: CreateMovieDto) {
     return this.moviesService.create(createMovieDto);
@@ -68,7 +55,6 @@ export class MoviesController {
   @ApiQuery({ name: 'releaseYear', required: false, type: Number })
   @ApiOkResponse({
     description: 'Movies list',
-    schema: { type: 'array', items: MovieOpenApiSchema },
   })
   findAll(@Query() searchMoviesDto: SearchMoviesDto) {
     return this.moviesService.findAll(searchMoviesDto);
@@ -78,11 +64,9 @@ export class MoviesController {
   @ApiOperation({ summary: 'Get a movie by ID' })
   @ApiOkResponse({
     description: 'Movie',
-    schema: MovieOpenApiSchema,
   })
   @ApiNotFoundResponse({
     description: 'Movie not found',
-    schema: NotFoundOpenApiSchema,
   })
   findOne(@Param('id', ParseIntPipe) id: number) {
     return this.moviesService.findOne(id);
@@ -92,15 +76,12 @@ export class MoviesController {
   @ApiOperation({ summary: 'Update a movie' })
   @ApiOkResponse({
     description: 'Updated movie',
-    schema: MovieOpenApiSchema,
   })
   @ApiBadRequestResponse({
     description: 'Invalid payload',
-    schema: BadRequestOpenApiSchema,
   })
   @ApiNotFoundResponse({
     description: 'Movie not found',
-    schema: NotFoundOpenApiSchema,
   })
   update(
     @Param('id', ParseIntPipe) id: number,
@@ -114,7 +95,6 @@ export class MoviesController {
   @ApiNoContentResponse({ description: 'Deleted successfully' })
   @ApiNotFoundResponse({
     description: 'Movie not found',
-    schema: NotFoundOpenApiSchema,
   })
   @HttpCode(HttpStatus.NO_CONTENT)
   remove(@Param('id', ParseIntPipe) id: number) {
