@@ -35,34 +35,45 @@ The following features are planned for implementation:
 ## Project Setup
 
 ```bash
-$ npm install
+npm install
 ```
 
 ## Compile and Run
 
+### Watch Mode
 ```bash
-# watch mode
-$ npm run start:dev
+npm run start:dev
+```
 
-# production mode
-$ npm run build
-$ npm run start:prod
+### Production Mode
+```bash
+npm run build
+```
+
+```bash
+npm run start:prod
 ```
 
 ## Running Tests
 
+### All Tests
 ```bash
-# all tests
-$ npm run test
+npm run test
+```
 
-# test coverage
-$ npm run test:cov
+### Test Coverage
+```bash
+npm run test:cov
+```
 
-# e2e tests
-$ npm run test:e2e
+### E2E Tests
+```bash
+npm run test:e2e
+```
 
-# watch mode
-$ npm run test:watch
+### Watch Mode
+```bash
+npm run test:watch
 ```
 
 ## License
