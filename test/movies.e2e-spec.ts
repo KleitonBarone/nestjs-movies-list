@@ -6,10 +6,14 @@ import { ZodValidationPipe } from 'nestjs-zod';
 import { Movie } from '../src/movies/entities/movie.entity';
 import { Server } from 'http';
 
+import { getRepositoryToken } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+
 describe('MoviesController (e2e)', () => {
   let app: INestApplication;
+  let movieRepository: Repository<Movie>;
 
-  beforeEach(async () => {
+  beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
       imports: [AppModule],
     }).compile();
@@ -17,9 +21,18 @@ describe('MoviesController (e2e)', () => {
     app = moduleFixture.createNestApplication();
     app.useGlobalPipes(new ZodValidationPipe());
     await app.init();
+
+    movieRepository = moduleFixture.get<Repository<Movie>>(
+      getRepositoryToken(Movie),
+    );
+  });
+
+  beforeEach(async () => {
+    await movieRepository.clear();
   });
 
   afterAll(async () => {
+    await movieRepository.clear();
     await app.close();
   });
 
@@ -67,6 +80,48 @@ describe('MoviesController (e2e)', () => {
         .expect(200)
         .expect((res) => {
           expect(Array.isArray(res.body)).toBe(true);
+        });
+    });
+
+    it('should filter movies by title', async () => {
+      await request(app.getHttpServer() as Server)
+        .post('/movies')
+        .send(movie);
+
+      return request(app.getHttpServer() as Server)
+        .get('/movies')
+        .query({ title: 'Inception' })
+        .expect(200)
+        .expect((res) => {
+          const body = res.body as Movie[];
+          expect(body.length).toBeGreaterThan(0);
+          expect(body[0].title).toBe('Inception');
+        });
+    });
+
+    it('should filter movies by genre', async () => {
+      await request(app.getHttpServer() as Server)
+        .post('/movies')
+        .send(movie);
+
+      return request(app.getHttpServer() as Server)
+        .get('/movies')
+        .query({ genre: 'Sci-Fi' })
+        .expect(200)
+        .expect((res) => {
+          const body = res.body as Movie[];
+          expect(body.length).toBeGreaterThan(0);
+          expect(body[0].genre).toBe('Sci-Fi');
+        });
+    });
+
+    it('should return empty list when no match', () => {
+      return request(app.getHttpServer() as Server)
+        .get('/movies')
+        .query({ title: 'NonExistentMovie' })
+        .expect(200)
+        .expect((res) => {
+          expect(res.body).toEqual([]);
         });
     });
   });
