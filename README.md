@@ -18,11 +18,10 @@ The following features are planned for implementation:
 - [x] **Data Model**: Comprehensive movie schema including Title, Genre, Release Year, Director, and more.
 - [x] **Authentication**: Secure access using JWT (JSON Web Tokens) for user-specific lists.
 - [x] **Search & Filtering**: Advanced search capabilities by title and filters for genre, year, etc.
-- [ ] **External Integration**: Automated movie data fetching from services like TMDB or OMDb.
 - [x] **Database Integration**: Reliable data storage using PostgreSQL with TypeORM or Prisma.
-- [ ] **API Documentation**: Interactive Swagger/OpenAPI documentation for easy integration.
-- [ ] **Containerization**: Docker support for consistent development and production environments.
-- [ ] **Unit & E2E Testing**: Comprehensive test suite to ensure stability and reliability.
+- [x] **API Documentation**: Interactive Swagger/OpenAPI documentation for easy integration.
+- [x] **Containerization**: Docker support for consistent development and production environments.
+- [x] **Unit & E2E Testing**: Comprehensive test suite to ensure stability and reliability.
 
 ## Project Setup
 
@@ -45,6 +44,19 @@ npm run build
 ```bash
 npm run start:prod
 ```
+
+## API Documentation
+
+- UI: http://localhost:3000/docs
+- JSON: http://localhost:3000/docs-json
+
+### Tags
+- Auth: login and signup
+- Movies: CRUD and search
+
+### Behaviors
+- DELETE `/movies/:id` returns 204 No Content on success
+- Typed error models for 400/401/404 are documented
 
 ## Running Tests
 

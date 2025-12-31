@@ -53,7 +53,6 @@ describe('MoviesController (e2e)', () => {
         .expect((res) => {
           const body = res.body as Movie;
           expect(body).toEqual({
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
             id: expect.any(Number),
             ...movie,
           });
@@ -115,6 +114,42 @@ describe('MoviesController (e2e)', () => {
         });
     });
 
+    it('should filter movies by releaseYear', async () => {
+      await request(app.getHttpServer() as Server)
+        .post('/movies')
+        .send(movie);
+
+      return request(app.getHttpServer() as Server)
+        .get('/movies')
+        .query({ releaseYear: 2010 })
+        .expect(200)
+        .expect((res) => {
+          const body = res.body as Movie[];
+          expect(body.length).toBeGreaterThan(0);
+          expect(body[0].releaseYear).toBe(2010);
+        });
+    });
+
+    it('should support combined filters (title + genre + releaseYear)', async () => {
+      await request(app.getHttpServer() as Server)
+        .post('/movies')
+        .send(movie);
+
+      return request(app.getHttpServer() as Server)
+        .get('/movies')
+        .query({ title: 'Inception', genre: 'Sci-Fi', releaseYear: 2010 })
+        .expect(200)
+        .expect((res) => {
+          const body = res.body as Movie[];
+          expect(body.length).toBe(1);
+          expect(body[0]).toMatchObject({
+            title: 'Inception',
+            genre: 'Sci-Fi',
+            releaseYear: 2010,
+          });
+        });
+    });
+
     it('should return empty list when no match', () => {
       return request(app.getHttpServer() as Server)
         .get('/movies')
@@ -149,7 +184,18 @@ describe('MoviesController (e2e)', () => {
     it('should return 404 for non-existent movie', () => {
       return request(app.getHttpServer() as Server)
         .get('/movies/999')
-        .expect(404);
+        .expect(404)
+        .expect((res) => {
+          const body = res.body as { message?: unknown };
+          expect(body).toHaveProperty('message');
+          expect(String(body.message)).toContain('not found');
+        });
+    });
+
+    it('should return 400 for invalid id param', () => {
+      return request(app.getHttpServer() as Server)
+        .get('/movies/abc')
+        .expect(400);
     });
   });
 
@@ -179,6 +225,19 @@ describe('MoviesController (e2e)', () => {
         .send({ title: 'New Title' })
         .expect(404);
     });
+
+    it('should return 400 for invalid update payload', async () => {
+      const createResponse = await request(app.getHttpServer() as Server)
+        .post('/movies')
+        .send(movie);
+
+      const movieId = (createResponse.body as Movie).id;
+
+      return request(app.getHttpServer() as Server)
+        .patch(`/movies/${movieId}`)
+        .send({ releaseYear: 100 })
+        .expect(400);
+    });
   });
 
   describe('/movies/:id (DELETE)', () => {
@@ -191,7 +250,7 @@ describe('MoviesController (e2e)', () => {
 
       await request(app.getHttpServer() as Server)
         .delete(`/movies/${movieId}`)
-        .expect(200);
+        .expect(204);
 
       return request(app.getHttpServer() as Server)
         .get(`/movies/${movieId}`)
