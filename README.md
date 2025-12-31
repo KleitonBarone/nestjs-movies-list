@@ -16,7 +16,7 @@ The following features are planned for implementation:
 
 - [x] **Core Movie API**: Full CRUD (Create, Read, Update, Delete) operations for movie records.
 - [x] **Data Model**: Comprehensive movie schema including Title, Genre, Release Year, Director, and more.
-- [ ] **Authentication**: Secure access using JWT (JSON Web Tokens) for user-specific lists.
+- [x] **Authentication**: Secure access using JWT (JSON Web Tokens) for user-specific lists.
 - [x] **Search & Filtering**: Advanced search capabilities by title and filters for genre, year, etc.
 - [ ] **External Integration**: Automated movie data fetching from services like TMDB or OMDb.
 - [x] **Database Integration**: Reliable data storage using PostgreSQL with TypeORM or Prisma.
@@ -68,7 +68,27 @@ npm run test:e2e
 npm run test:watch
 ```
 
+## Containerization
+
+- **Prerequisites:** Docker and Docker Compose installed.
+- **Env setup:** Copy `.env.example` to `.env` and set `DB_USERNAME`, `DB_PASSWORD`, `DB_DATABASE`, `JWT_SECRET`. Defaults: `PORT=3000`, `DB_PORT=5432`.
+- **Start services:**
+```bash
+docker compose up -d
+```
+- **Build and run API + DB:**
+```bash
+docker compose up --build -d
+```
+- **Check API health:**
+```bash
+curl -s http://localhost:3000 | head -n 1
+```
+- **Stop services:**
+```bash
+docker compose down
+```
+
 ## License
 
 This project is [MIT licensed](LICENSE).
-
