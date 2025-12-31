@@ -17,7 +17,7 @@ The following features are planned for implementation:
 - [x] **Core Movie API**: Full CRUD (Create, Read, Update, Delete) operations for movie records.
 - [x] **Data Model**: Comprehensive movie schema including Title, Genre, Release Year, Director, and more.
 - [ ] **Authentication**: Secure access using JWT (JSON Web Tokens) for user-specific lists.
-- [ ] **Search & Filtering**: Advanced search capabilities by title and filters for genre, year, etc.
+- [x] **Search & Filtering**: Advanced search capabilities by title and filters for genre, year, etc.
 - [ ] **External Integration**: Automated movie data fetching from services like TMDB or OMDb.
 - [x] **Database Integration**: Reliable data storage using PostgreSQL with TypeORM or Prisma.
 - [ ] **API Documentation**: Interactive Swagger/OpenAPI documentation for easy integration.
